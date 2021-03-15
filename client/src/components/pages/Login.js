@@ -1,6 +1,80 @@
-import React from "react";
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+import axios from "axios";
 
 export default function Login({ name }) {
+  let history = useHistory();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  //errors
+  const [erremail, seterrEmail] = useState("");
+  const [errpassword, seterrPassword] = useState("");
+  const [displaymessage, setdisplaymessage] = useState("");
+
+  function resetErrors() {
+    seterrEmail("");
+    seterrPassword("");
+    setdisplaymessage("");
+  }
+
+  async function login(e) {
+    e.preventDefault();
+    try {
+      const registerData = {
+        email,
+        password,
+      };
+
+      //reset errors before axios call
+      resetErrors();
+
+      var resData = await axios.post(
+        "http://localhost:5000/auth/login",
+        registerData
+      );
+
+      if (resData.data.status === "success") {
+        console.log(resData.data.status);
+        history.push("/");
+      }
+
+      if (resData.data.displaymessage) {
+        setdisplaymessage(
+          <div className="alert alert-danger alert-dismissible animate__animated animate__flash">
+            {resData.data.displaymessage}
+          </div>
+        );
+      }
+
+      if (resData.data.verrors) {
+        var verror = resData.data.verrors;
+
+        console.log(verror);
+
+        for (const verr in verror) {
+          if (verror[verr].field === "erremail") {
+            seterrEmail(
+              <div className="animate__animated animate__flash">
+                {verror[verr].message}
+              </div>
+            );
+          }
+          if (verror[verr].field === "errpassword") {
+            seterrPassword(
+              <div className="animate__animated animate__flash">
+                {verror[verr].message}
+              </div>
+            );
+          }
+        }
+      } else {
+      }
+    } catch (err) {
+      console.error("login error", err);
+    }
+  } //login
   return (
     <>
       <div className="content-wrapper">
@@ -16,59 +90,54 @@ export default function Login({ name }) {
               <div className="col-md-6">
                 <div className="card card-default">
                   <div className="card-header bg-light color-palette">
-                    <h3 className="card-title">Please login</h3>
+                    <h3 className="card-title">Please Login</h3>
                   </div>
 
-                  <form className="form-horizontal">
+                  <form onSubmit={login} className="form-horizontal">
                     <div className="card-body">
+                      <div>{displaymessage}</div>
                       <div className="form-group row">
-                        <label className="col-sm-2 col-form-label">Email</label>
-                        <div className="col-sm-10">
+                        <label className="col-sm-12 col-form-label">
+                          Email
+                        </label>
+                        <div className="col-sm-12">
                           <input
-                            type="email"
                             className="form-control"
-                            id="inputEmail3"
+                            id="inputEmail"
                             placeholder="Email"
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email}
                           />
-                            <div className="text-danger mt-3"></div>
-
+                        </div>
+                        <div className="col-sm-12">
+                          <div className="text-danger">{erremail}</div>
                         </div>
                       </div>
                       <div className="form-group row">
-                        <label className="col-sm-2 col-form-label">
+                        <label className="col-sm-12 col-form-label">
                           Password
                         </label>
-                        <div className="col-sm-10">
+                        <div className="col-sm-12">
                           <input
                             type="password"
                             className="form-control"
-                            id="inputPassword3"
+                            id="inputPassword"
                             placeholder="Password"
+                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}
                           />
                         </div>
-                      </div>
-                      {/* <div className="form-group row">
-                        <div className="offset-sm-2 col-sm-10">
-                          <div className="form-check">
-                            <input
-                              type="checkbox"
-                              className="form-check-input"
-                              id="exampleCheck2"
-                            />
-                            <label className="form-check-label">
-                              Remember me
-                            </label>
-                          </div>
+                        <div className="col-sm-12">
+                          <div className="text-danger">{errpassword}</div>
                         </div>
                       </div>
-                     */}
                     </div>
                     <div className="card-footer">
                       <button
                         type="submit"
                         className="btn btn-info float-right"
                       >
-                        Sign in
+                        login
                       </button>
                     </div>
                   </form>

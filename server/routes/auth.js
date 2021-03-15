@@ -9,36 +9,36 @@ var validator = require("validator");
 //signup
 router.post("/signup", async (req, res, next) => {
   try {
-    var name = validator.trim(req.body.name);
+    var name = validator.trim(req.body.fullname);
     var email = validator.trim(req.body.email);
     var password = validator.trim(req.body.password);
-    var passwordverify = validator.trim(req.body.passwordverify);
+    var passwordverify = validator.trim(req.body.varifyPassword);
 
     var verrors = [];
 
     //validation
     if (validator.isEmpty(name)) {
       verrors.push({
-        field: "name",
+        field: "errfullname",
         message: "Name field is required.",
       });
     }
     if (!validator.isEmail(email)) {
       verrors.push({
-        field: "email",
-        message: "Please enter correct Email address.",
+        field: "erremail",
+        message: "Please enter a valid email address.",
       });
     }
     if (password.length < 6) {
       verrors.push({
-        field: "password",
-        message: "Please make a password at least 6 characters long.",
+        field: "errpassword",
+        message: "Please choose a password at least 6 characters long.",
       });
     }
     if (password !== passwordverify) {
       verrors.push({
-        field: "passwordverify",
-        message: "Password verification failed.",
+        field: "errvarifyPassword",
+        message: "Password verification mismatched.",
       });
     }
 
@@ -54,7 +54,7 @@ router.post("/signup", async (req, res, next) => {
       if (userdata) {
         return res.send({
           status: "failed",
-          message: "This email address is already registered.",
+          displaymessage: "This email address is already registered.",
           data: {},
         });
       } else {
@@ -72,13 +72,13 @@ router.post("/signup", async (req, res, next) => {
 
         //login token and set cookie
         AuthHelper.setlogintoken(usersave._id, res);
-        
+
         //response send
         return res.send({
           status: "success",
           message: "User has been successfully registered.",
           data: {
-            _id: usersave._id,
+            // _id: usersave._id,
             name: usersave.name,
             email: usersave.email,
           },
@@ -89,6 +89,7 @@ router.post("/signup", async (req, res, next) => {
     return res.send({
       status: "failed",
       message: "Registration error.",
+      displaymessage: "Something went wrong please try again.",
       data: err,
     });
   }
@@ -106,14 +107,20 @@ router.post("/login", async (req, res, next) => {
 
     if (!validator.isEmail(email)) {
       verrors.push({
-        field: "email",
-        message: "Please enter correct Email address.",
+        field: "erremail",
+        message: "Please enter correct email address.",
       });
     }
-    if (password.length < 6) {
+
+    if (password === "") {
       verrors.push({
-        field: "password",
-        message: "Password length is too short.",
+        field: "errpassword",
+        message: "Please enter password.",
+      });
+    } else if (password.length < 6) {
+      verrors.push({
+        field: "errpassword",
+        message: "Password length must be at least 6 characters long.",
       });
     }
 
@@ -128,7 +135,7 @@ router.post("/login", async (req, res, next) => {
       if (!userdata) {
         return res.send({
           status: "failed",
-          message: "Invalid Email or Password.",
+          displaymessage: "Invalid email or password.",
           data: {},
         });
       } else {
@@ -139,7 +146,7 @@ router.post("/login", async (req, res, next) => {
         if (!comparepassword) {
           return res.send({
             status: "failed",
-            message: "Invalid Email or Password.",
+            displaymessage: "Invalid email or password.",
             data: {},
           });
         } else {
@@ -150,7 +157,7 @@ router.post("/login", async (req, res, next) => {
             status: "success",
             message: "Login successful.",
             data: {
-              _id: userdata._id,
+              // _id: userdata._id,
               name: userdata.name,
               email: userdata.email,
             },
@@ -162,6 +169,7 @@ router.post("/login", async (req, res, next) => {
     return res.send({
       status: "failed",
       message: "Login error.",
+      displaymessage: "Something went wrong please try again.",
       data: err,
     });
   }
