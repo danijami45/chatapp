@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
+import AuthContext from "../../context/AuthContext";
 
 export default function Login({ name }) {
+  const { getLoggedin } = useContext(AuthContext);
   let history = useHistory();
 
   const [email, setEmail] = useState("");
@@ -36,8 +38,8 @@ export default function Login({ name }) {
       );
 
       if (resData.data.status === "success") {
-        console.log(resData.data.status);
-        history.push("/");
+        getLoggedin();
+        history.push("/user");
       }
 
       if (resData.data.displaymessage) {
@@ -50,8 +52,6 @@ export default function Login({ name }) {
 
       if (resData.data.verrors) {
         var verror = resData.data.verrors;
-
-        console.log(verror);
 
         for (const verr in verror) {
           if (verror[verr].field === "erremail") {

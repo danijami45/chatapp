@@ -181,4 +181,19 @@ router.get("/logout", async (req, res, next) => {
   return AuthHelper.logouttoken(res);
 });
 
+//loggedin
+router.get("/loggedin", async (req, res, next) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.json(false);
+    } else {
+      jwt.verify(token, process.env.JWT_SECRET);
+      res.send(true);
+    }
+  } catch (err) {
+    return res.json(false);
+  }
+});
+
 module.exports = router;
